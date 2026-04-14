@@ -2,192 +2,27 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SHATNA | شاتنا</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.1/dist/browser-image-compression.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <title>عرض صورة</title>
     <style>
-        :root { --p-green: #2D5A27; --p-beige: #F5F5DC; }
-        body { background: var(--p-beige); color: var(--p-green); font-family: 'Segoe UI', sans-serif; overflow: hidden; }
-        .glass { background: rgba(255, 255, 255, 0.5); backdrop-filter: blur(10px); border: 1px solid rgba(45, 90, 39, 0.1); }
-        #main-app { display: none; }
-        .chat-me { background: var(--p-green); color: white; border-radius: 15px 15px 0 15px; }
-        .chat-other { background: white; border: 1px solid #ddd; border-radius: 15px 15px 15px 0; }
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
     </style>
 </head>
-<body class="h-screen flex flex-col">
+<body>
 
-    <div id="auth-screen" class="fixed inset-0 z-[100] bg-[var(--p-beige)] flex items-center justify-center p-4">
-        <div class="glass p-8 rounded-[2rem] w-full max-w-md shadow-2xl text-center">
-            <img src="shatna.png" class="w-20 h-20 mx-auto mb-4 rounded-full border-2 border-[var(--p-green)]" onerror="this.src='https://via.placeholder.com/80'">
-            <h1 class="text-3xl font-black mb-6">SHATNA</h1>
-            
-            <input type="tel" id="u-phone" class="w-full p-4 rounded-xl border-2 border-[var(--p-green)] mb-3 text-center" placeholder="أدخل رقم موبايلك">
-            <input type="text" id="u-name" class="w-full p-4 rounded-xl border-2 border-[var(--p-green)] mb-3 text-center" placeholder="اسمك المستعار">
-            <input type="password" id="u-pass" class="w-full p-4 rounded-xl border-2 border-[var(--p-green)] mb-6 text-center" placeholder="كلمة السر">
-            
-            <button onclick="handleAuth()" class="w-full bg-[var(--p-green)] text-white py-4 rounded-xl font-bold text-lg shadow-lg">دخول / إنشاء حساب</button>
-        </div>
-    </div>
+    <img src="1.png" alt="وصف الصورة هنا">
 
-    <div id="main-app" class="flex-1 flex flex-col h-full">
-        <header class="glass p-3 px-6 flex justify-between items-center border-b">
-            <div class="flex items-center gap-3">
-                <img src="shatna.png" class="w-10 h-10 rounded-full">
-                <h2 class="font-black text-xl italic">SHATNA</h2>
-            </div>
-            <div id="my-info" class="text-xs font-bold opacity-70"></div>
-        </header>
-
-        <div class="flex flex-1 overflow-hidden">
-            <aside class="w-1/4 glass border-l p-4 overflow-y-auto">
-                <button onclick="startNewChat()" class="w-full bg-[var(--p-green)] text-white p-3 rounded-xl mb-4 text-sm font-bold">
-                    <i class="fas fa-plus ml-2"></i> محادثة جديدة
-                </button>
-                <div id="contacts-list" class="space-y-2">
-                    </div>
-            </aside>
-
-            <main class="flex-1 flex flex-col bg-white/30 relative">
-                <div id="chat-header" class="p-4 glass border-b font-bold text-sm hidden">
-                    تدردش الآن مع: <span id="target-phone"></span>
-                </div>
-
-                <div id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-3">
-                    <div class="h-full flex items-center justify-center text-gray-400">
-                        اختر محادثة أو ابدأ واحدة جديدة
-                    </div>
-                </div>
-
-                <div id="chat-input-area" class="p-4 glass border-t flex gap-3 hidden">
-                    <input type="text" id="msg-input" class="flex-1 p-3 rounded-full border outline-none shadow-inner" placeholder="اكتب رسالتك هنا...">
-                    <button onclick="sendMsg()" class="w-12 h-12 bg-[var(--p-green)] text-white rounded-full flex items-center justify-center shadow-lg">
-                        <i class="fas fa-paper-plane"></i>
-                    </button>
-                </div>
-            </main>
-        </div>
-    </div>
-
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getFirestore, doc, getDoc, setDoc, collection, addDoc, onSnapshot, query, orderBy, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyAIyk8FnwFFiKC7lP1UEWY6RR8-AgC6MVY",
-            authDomain: "shatna-42a95.firebaseapp.com",
-            projectId: "shatna-42a95",
-            storageBucket: "shatna-42a95.firebasestorage.app",
-            messagingSenderId: "213829278703",
-            appId: "1:213829278703:web:6b966e9dac59d3b6e4741a"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        let me = null;
-        let activeChat = null;
-
-        window.handleAuth = async () => {
-            const phone = document.getElementById('u-phone').value;
-            const name = document.getElementById('u-name').value;
-            const pass = document.getElementById('u-pass').value;
-
-            if(!phone || !pass || !name) return alert("اكمل البيانات!");
-
-            const userRef = doc(db, "users", phone);
-            const userSnap = await getDoc(userRef);
-
-            if (userSnap.exists()) {
-                if (userSnap.data().pass === pass) {
-                    login(phone, name);
-                } else {
-                    alert("كلمة السر خطأ!");
-                }
-            } else {
-                await setDoc(userRef, { name, pass, phone });
-                login(phone, name);
-            }
-        };
-
-        function login(phone, name) {
-            me = { phone, name };
-            document.getElementById('auth-screen').style.display = 'none';
-            document.getElementById('main-app').style.display = 'flex';
-            document.getElementById('my-info').innerText = `أهلاً، ${name} (${phone})`;
-            loadContacts();
-        }
-
-        window.startNewChat = () => {
-            const target = prompt("أدخل رقم الموبايل اللي عايز تدردش معاه:");
-            if (target && target !== me.phone) {
-                openChat(target);
-            }
-        };
-
-        function openChat(target) {
-            activeChat = target;
-            document.getElementById('chat-header').classList.remove('hidden');
-            document.getElementById('chat-input-area').classList.remove('hidden');
-            document.getElementById('target-phone').innerText = target;
-            
-            // تحديد "معرف الغرفة" بشكل فريد بين الرقمين
-            const chatId = [me.phone, target].sort().join("_");
-            loadMessages(chatId);
-        }
-
-        window.sendMsg = async () => {
-            const text = document.getElementById('msg-input').value;
-            if(!text || !activeChat) return;
-
-            const chatId = [me.phone, activeChat].sort().join("_");
-            await addDoc(collection(db, "messages"), {
-                chatId,
-                sender: me.phone,
-                text,
-                time: serverTimestamp()
-            });
-            document.getElementById('msg-input').value = "";
-        };
-
-        function loadMessages(chatId) {
-            const q = query(collection(db, "messages"), where("chatId", "==", chatId), orderBy("time", "asc"));
-            onSnapshot(q, (snap) => {
-                const box = document.getElementById('chat-messages');
-                box.innerHTML = "";
-                snap.forEach(doc => {
-                    const m = doc.data();
-                    const isMe = m.sender === me.phone;
-                    box.innerHTML += `
-                        <div class="flex ${isMe ? 'justify-end' : 'justify-start'}">
-                            <div class="p-3 max-w-[80%] text-sm ${isMe ? 'chat-me' : 'chat-other shadow-sm'}">
-                                ${m.text}
-                            </div>
-                        </div>`;
-                });
-                box.scrollTop = box.scrollHeight;
-            });
-        }
-
-        function loadContacts() {
-            // كود مبسط لعرض الأرقام اللي حصل بينك وبينهم شات قبل كدة
-            const q = query(collection(db, "messages"), where("chatId", ">=", ""), orderBy("chatId"));
-            onSnapshot(q, (snap) => {
-                const list = document.getElementById('contacts-list');
-                const contacts = new Set();
-                snap.forEach(doc => {
-                    const parts = doc.data().chatId.split("_");
-                    if (parts.includes(me.phone)) {
-                        const other = parts.find(p => p !== me.phone);
-                        if (other) contacts.add(other);
-                    }
-                });
-                list.innerHTML = "";
-                contacts.forEach(c => {
-                    list.innerHTML += `<div onclick="openChat('${c}')" class="p-3 glass rounded-xl cursor-pointer hover:bg-white transition font-bold text-sm text-center">${c}</div>`;
-                });
-            });
-        }
-    </script>
 </body>
 </html>
